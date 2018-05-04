@@ -62,8 +62,8 @@ $(function() {
     }
 },
             { data: 'photo', name: 'photo',
-            	render: function (data, url) {
-            		return "<img height=50 width=50 src='/uploads/photos/' />";
+            	render: function (data, type) {
+            		return "<img height=50 width=50 src='uploads/photos/'></img>";
             	}
              },
             { data: 'name', name: 'name' },

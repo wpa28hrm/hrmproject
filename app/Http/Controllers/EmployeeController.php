@@ -84,19 +84,21 @@ class EmployeeController extends Controller
         ]);
 
 
-        $employees = DB::table('employees');
+        $employees = Employee::all();
 
         if($request->hasFile('photo')){
             $photo = $request->file('photo');
             $filename = $photo->getClientOriginalName();
-            Image::make($photo)->resize(300, 300)->save('uploads/photos/'. $filename );
-
-            $employees->photo = $photo;
+            Image::make($photo)->resize(200, 200);
+            Storage::put('uploads/photos', $photo);
             // $employees->save();
-        }
+
+            // $employees->photo = $photo;
+            // $employees->save();
+        
         Employee::create($request->all());
-        return view('Employee.index', compact('employees'))
-                    ->with('success', "Successful Registered");
+        return view('Employee.index');
+    }
 
     }
 
@@ -162,17 +164,7 @@ class EmployeeController extends Controller
     {
 
         Employee::find($id)->delete();
-        return redirect()->route('emp.index')
-                        ->with('success', "Employee info Deleted Successful");
-        // $employees = Employee::findOrFail($id);
-        // Employee::destroy($id);
-
-        // return redirect()->route("emp.index", "Successful Deleted");
-        // $products = Product::findOrFail($id);
-        // if(\Auth::user()->can('delete-products', $products)) {
-        //     Product::destroy($id);
-        // }
-        // return redirect()->route("product.index");    
+        return redirect()->route('emp.index');
     }
 
 
@@ -199,34 +191,33 @@ class EmployeeController extends Controller
     //     // $path = $request->file('avatar')->put('avatars');
     // }
 
-    private function createQueryInput($keys, $request) {
-        $queryInput = [];
-        for($i = 0; $i < sizeof($keys); $i++) {
-            $key = $keys[$i];
-            $queryInput[$key] = $request[$key];
-        }
+    // private function createQueryInput($keys, $request) {
+    //     $queryInput = [];
+    //     for($i = 0; $i < sizeof($keys); $i++) {
+    //         $key = $keys[$i];
+    //         $queryInput[$key] = $request[$key];
+    //     }
 
-        return $queryInput;
-    }
+    //     return $queryInput;
+    // }
 
      public function data(Request $request) {
 
         if($request->ajax()) {
 
             $model = Employee::latest();
-
             return Datatables::of($model)
                 ->addColumn("action", function($model) {
                     $data = '<div class="col-md-3"><a href="'.route("emp.edit", $model->id).'"><button class="btn btn-success"><i class="fa fa-pencil"></i></button></a></div>'.
                             '<div class="col-md-1"><form action="' . route('emp.destroy', $model->id). '" method="post">'
                                 . csrf_field() .
                                  method_field("delete") .
-                                '<button class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+                                '<button class="btn btn-danger" ><i class="fa fa-trash-o"></i></button>
                             </form></div>';
                             return $data;
             })
             ->rawColumns(['action'])
-            ->make(true);
+            ->toJson();
     }
     return abort(404);
 }
@@ -272,7 +263,3 @@ class EmployeeController extends Controller
         // }
         // 
             
-// <ul class="dropdown-menu pull-right">
-//                                         <li><a href="#" data-toggle="modal" data-target="#edit_employee"><i class="fa fa-pencil m-r-5"></i> Edit</a></li>
-//                                         <li><a href="#" data-toggle="modal" data-target="#delete_employee"><i class="fa fa-trash-o m-r-5"></i> Delete</a></li>
-//                                     </ul>
